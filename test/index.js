@@ -61,10 +61,10 @@ describe('DijixPDF', function () {
   });
   describe('creationPipeline', function () {
     it('uploads the pdf and creates thumbnails', async function () {
-      const { fileSize, meta, numPages, src, fileName, name, pages } = await dijixPdf.creationPipeline({ src: testPdfSrc }, mockDijix);
+      const { fileSize, metaData, pageCount, src, fileName, name, pages } = await dijixPdf.creationPipeline({ src: testPdfSrc }, mockDijix);
       assert.equal(fileSize, 9281);
-      assert.equal(typeof meta, 'object');
-      assert.equal(numPages, 5);
+      assert.equal(typeof metaData, 'object');
+      assert.equal(pageCount, 5);
       assert.equal(src, 'Fake IPFS Hash');
       assert.equal(fileName, 'test.pdf');
       assert.equal(name, 'Microsoft Word - Document1');
@@ -72,10 +72,10 @@ describe('DijixPDF', function () {
     });
     it('uploads and does not create thumbnails when pages is false', async function () {
       const { pages } = await dijixPdf.creationPipeline({ src: testPdfSrc, pages: false }, mockDijix);
-      assert.equal(typeof pages, 'undefined');
+      assert.equal(typeof pages, 'undefined', 'passed');
       dijixPdf = new DijixPDF({ pages: false });
       const { pages: pages2 } = await dijixPdf.creationPipeline({ src: testPdfSrc }, mockDijix);
-      assert.equal(typeof pages2, 'undefined');
+      assert.equal(typeof pages2, 'undefined', 'constructor');
     });
   });
 });

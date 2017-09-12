@@ -75,8 +75,8 @@ export default class DijixPDF {
     const pdf = await this.getPagesData(data);
     const fileSize = pdf.loadingTask.fileSize;
     const pageCount = pdf.pdfInfo.numPages;
-    const usePages = this.config.pages && opts.pages !== false;
-    const pages = usePages && await this.generatePageThumbnails({ pdf, dijix, opts });
+    const usePages = opts.pages !== false && (this.config.pages || opts.pages);
+    const pages = !!usePages && await this.generatePageThumbnails({ pdf, dijix, opts });
     const src = await dijix.ipfs.put(opts.src);
     const mime = 'application/pdf';
     const { info: { Title: title, ...metaData } } = await pdf.getMetadata();
