@@ -1,4 +1,6 @@
 /* eslint-disable max-len, global-require */
+/* globals window */
+
 import assert from 'assert';
 
 import DijixPDF from '../src';
@@ -17,7 +19,20 @@ const mockDijix = {
   },
 };
 
-const testPdfSrc = 'test/test.pdf';
+const isBrowser = typeof window !== 'undefined';
+
+// stub file reader
+if (isBrowser) {
+  window.FileReader = class FileReader {
+    readAsArrayBuffer() {
+      this.result = require('./test.pdf');
+      this.onload();
+    }
+  };
+}
+
+const testPdfSrc = !isBrowser ? 'test/test.pdf' : {};
+
 const fakePages = [
   'test ipfs hash',
   'test ipfs hash',
@@ -51,7 +66,7 @@ describe('DijixPDF', function () {
   describe('getPagesImageData', function () {
     it('returns the page image data', async function () {
       const pages = await dijixPdf.getPagesImageData(pdf);
-      assert.equal(JSON.stringify(pages).length, 79906);
+      assert.equal(JSON.stringify(pages).length, isBrowser ? 216798 : 79906);
     });
   });
   describe('generatePageThumbnails', function () {
@@ -66,7 +81,7 @@ describe('DijixPDF', function () {
       assert.equal(typeof metaData, 'object');
       assert.equal(pageCount, 5);
       assert.equal(src, 'Fake IPFS Hash');
-      assert.equal(fileName, 'test.pdf');
+      assert.equal(fileName, isBrowser ? undefined : 'test.pdf');
       assert.equal(name, 'Microsoft Word - Document1');
       assert.deepEqual(pages, fakePages);
     });
@@ -79,24 +94,3 @@ describe('DijixPDF', function () {
     });
   });
 });
-
-/*
-type: 'multiPagePdf',
-schema: '0.0.1',
-created: 1504149884688,
-encryption: { ... }, // TODO figure something out for encryption; applied individually to all IPFS objects before uploaded
-data: {
-  name: 'Profit Report 2016',
-  fileName: 'accounting_report.jpg',
-  metadata: { ... }, // optional field; pdf meta data, such as title, author, subject, keywords
-  size: 123123123,
-  src: 'ipfs://<ipfs hash>', // original PDF src
-  mimeType: 'application/pdf'
-  pages: [
-    'ipfs://<ipfs hash>', // links to imageWithThumbnails
-    'ipfs://<ipfs hash>',
-    'ipfs://<ipfs hash>',
-    'ipfs://<ipfs hash>',
-  ]
-}
-*/

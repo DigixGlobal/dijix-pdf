@@ -4,18 +4,21 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
-  entry: [
-    'babel-polyfill',
-    'mocha-loader!./test/index.js',
-  ],
+  entry: {
+    main: [
+      'babel-polyfill',
+      'mocha-loader!./test/index.js',
+    ],
+    'pdf.worker': 'pdfjs-dist/build/pdf.worker.entry',
+  },
   output: {
-    filename: 'bundle.js',
+    filename: '[name].bundle.js',
     path: path.resolve(__dirname, 'testDist'),
   },
   module: {
     rules: [{
-      test: /\.jpe?g$|\.gif$|\.png$|\.eot$|\.svg$/,
-      loader: 'file-loader',
+      test: /\.pdf$/,
+      loader: 'uint8array-loader',
     }, {
       test: /\.js?$/,
       loader: 'babel-loader',

@@ -21,14 +21,7 @@ const isBrowser = typeof window !== 'undefined';
 
 PDFJS.disableWorker = !isBrowser;
 PDFJS.disableFontFace = !isBrowser;
-
-/*
-- read the pdf + data
-- read the image data for each page
-- upload the pages to IPFS (via DijixImage), set the data
-- uplaod the raw PDF to ipfs
-- return the dijix object
-*/
+PDFJS.workerSrc = 'pdf.worker.bundle.js';
 
 export default class DijixPDF {
   constructor(config) {
