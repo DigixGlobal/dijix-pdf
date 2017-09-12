@@ -1,7 +1,7 @@
 /* globals window, PDFJS */
 import 'pdfjs-dist';
 import fs from 'fs';
-import canvas from 'isomorphic-canvas';
+import canvas from '@hitchcott/isomorphic-canvas';
 import * as a from 'awaiting';
 
 const defaultConfig = {
@@ -17,11 +17,31 @@ const defaultConfig = {
   },
 };
 
+global.HTMLElement = typeof HTMLElement === 'undefined' ? class HTMLElement {} : global.HTMLElement;
+global.Image = typeof Image === 'undefined' ? canvas.Image : global.Image;
+
 const isBrowser = typeof window !== 'undefined';
 
+class CanvasFactory {
+  create(width, height) {
+    if (width <= 0 || height <= 0) {
+      throw new Error('invalid canvas size');
+    }
+    const c = canvas(width, height);
+    return {
+      canvas: c,
+      context: c.getContext('2d'),
+    };
+  }
+  destroy() { }
+  reset() { }
+}
+
+const canvasFactory = new CanvasFactory();
+
+PDFJS.workerSrc = 'pdf.worker.bundle.js';
 PDFJS.disableWorker = !isBrowser;
 PDFJS.disableFontFace = !isBrowser;
-PDFJS.workerSrc = 'pdf.worker.bundle.js';
 
 export default class DijixPDF {
   constructor(config) {
@@ -45,23 +65,18 @@ export default class DijixPDF {
     pdf.fileSize = data.byteLength;
     return pdf;
   }
-  async getPagesImageData(pdf) {
+  async generatePageThumbnails({ pdf, dijix }) {
     return a.map(Array.from(Array(pdf.pdfInfo.numPages).keys()), 1, async (i) => {
+      console.log(`processing PDF page ${i + 1} of ${pdf.pdfInfo.numPages}`);
       const page = await pdf.getPage(i + 1);
       const scale = this.config.pages.maxWidth / page.pageInfo.view[2];
       const viewport = page.getViewport(scale);
-      const c = canvas(viewport.width, viewport.height);
-      const canvasContext = c.getContext('2d');
-      await page.render({ canvasContext, viewport });
-      return c.toDataURL();
+      const canvasAndContext = canvasFactory.create(viewport.width, viewport.height);
+      await page.render({ canvasContext: canvasAndContext.context, viewport, canvasFactory });
+      const src = canvasAndContext.canvas.toDataURL();
+      const { ipfsHash } = await dijix.create('image', { src, config: { thumbnails: this.config.pages } });
+      return ipfsHash;
     });
-  }
-  async generatePageThumbnails({ pdf, dijix }) {
-    const pages = await this.getPagesImageData(pdf);
-    // do this in series otherwise as thumbnails are in parralel
-    // TODO pass watermark options
-    const dijixObjects = await a.map(pages, 1, src => dijix.create('image', { src, config: { thumbnails: this.config.pages } }));
-    return dijixObjects.map(({ ipfsHash }) => ipfsHash);
   }
   async creationPipeline(opts, dijix) {
     const data = await this.readInput(opts.src);
@@ -70,9 +85,11 @@ export default class DijixPDF {
     const pageCount = pdf.pdfInfo.numPages;
     const usePages = opts.pages !== false && (this.config.pages || opts.pages);
     const pages = !!usePages && await this.generatePageThumbnails({ pdf, dijix, opts });
-    const src = await dijix.ipfs.put(opts.src);
+    const src = await dijix.ipfs.put(Buffer.from(data));
     const mime = 'application/pdf';
-    const { info: { Title: title, ...metaData } } = await pdf.getMetadata();
+    // const { info: { Title: title, ...metaData } } = {}; //{} await pdf.getMetadata();
+    const title = 'test';
+    const metaData = {};
     const file = typeof opts.src === 'string' && opts.src.match(/^(([A-Z]:)?[.]?[\\{1,2}/]?.*[\\{1,2}/])*(.+)\.(.+)/);
     // digix object
     const dijixObjectData = { fileSize, metaData, pageCount, src, mime };

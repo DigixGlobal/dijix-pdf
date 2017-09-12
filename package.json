@@ -1,8 +1,8 @@
 {
   "name": "dijix-pdf",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "PDF Plugin for Dijix",
-  "main": "index.js",
+  "main": "src/index.js",
   "files": [
     "src"
   ],
@@ -21,6 +21,7 @@
     "babel-preset-env": "^1.5.1",
     "babel-preset-stage-0": "^6.24.1",
     "babel-register": "^6.26.0",
+    "bluebird": "^3.5.0",
     "eslint": "^3.19.0",
     "eslint-config-airbnb": "^15.0.1",
     "eslint-plugin-import": "^2.2.0",
@@ -34,9 +35,9 @@
     "webpack-dev-server": "^2.7.1"
   },
   "dependencies": {
+    "@hitchcott/isomorphic-canvas": "0.0.7",
     "awaiting": "^3.0.0",
     "canvas": "^1.6.7",
-    "isomorphic-canvas": "^0.1.1",
     "pdfjs-dist": "^1.9.554"
   }
 }
