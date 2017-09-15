@@ -1,6 +1,6 @@
 {
   "name": "dijix-pdf",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "PDF Plugin for Dijix",
   "main": "dist/index.js",
   "files": [

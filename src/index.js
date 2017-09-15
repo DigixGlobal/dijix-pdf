@@ -67,7 +67,6 @@ export default class DijixPDF {
   }
   async generatePageThumbnails({ pdf, dijix }) {
     return a.map(Array.from(Array(pdf.pdfInfo.numPages).keys()), 1, async (i) => {
-      console.log(`processing PDF page ${i + 1} of ${pdf.pdfInfo.numPages}`);
       const page = await pdf.getPage(i + 1);
       const scale = this.config.pages.maxWidth / page.pageInfo.view[2];
       const viewport = page.getViewport(scale);
@@ -87,14 +86,12 @@ export default class DijixPDF {
     const pages = !!usePages && await this.generatePageThumbnails({ pdf, dijix, opts });
     const src = await dijix.ipfs.put(Buffer.from(data));
     const mime = 'application/pdf';
-    // const { info: { Title: title, ...metaData } } = {}; //{} await pdf.getMetadata();
-    const title = 'test';
     const metaData = {};
     const file = typeof opts.src === 'string' && opts.src.match(/^(([A-Z]:)?[.]?[\\{1,2}/]?.*[\\{1,2}/])*(.+)\.(.+)/);
     // digix object
     const dijixObjectData = { fileSize, metaData, pageCount, src, mime };
     const fileName = opts.fileName || (file && `${file[3]}.pdf`);
-    const name = opts.name || title;
+    const name = opts.name;
     if (fileName) { dijixObjectData.fileName = fileName; }
     if (name) { dijixObjectData.name = name; }
     if (pages) { dijixObjectData.pages = pages; }

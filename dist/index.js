@@ -198,29 +198,28 @@ var DijixPDF = function () {
                       while (1) {
                         switch (_context3.prev = _context3.next) {
                           case 0:
-                            console.log('processing PDF page ' + (i + 1) + ' of ' + pdf.pdfInfo.numPages);
-                            _context3.next = 3;
+                            _context3.next = 2;
                             return pdf.getPage(i + 1);
 
-                          case 3:
+                          case 2:
                             page = _context3.sent;
                             scale = _this.config.pages.maxWidth / page.pageInfo.view[2];
                             viewport = page.getViewport(scale);
                             canvasAndContext = canvasFactory.create(viewport.width, viewport.height);
-                            _context3.next = 9;
+                            _context3.next = 8;
                             return page.render({ canvasContext: canvasAndContext.context, viewport: viewport, canvasFactory: canvasFactory });
 
-                          case 9:
+                          case 8:
                             src = canvasAndContext.canvas.toDataURL();
-                            _context3.next = 12;
+                            _context3.next = 11;
                             return dijix.create('image', { src: src, config: { thumbnails: _this.config.pages } });
 
-                          case 12:
+                          case 11:
                             _ref6 = _context3.sent;
                             ipfsHash = _ref6.ipfsHash;
                             return _context3.abrupt('return', ipfsHash);
 
-                          case 15:
+                          case 14:
                           case 'end':
                             return _context3.stop();
                         }
@@ -251,7 +250,7 @@ var DijixPDF = function () {
     key: 'creationPipeline',
     value: function () {
       var _ref7 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee5(opts, dijix) {
-        var data, pdf, fileSize, pageCount, usePages, pages, src, mime, title, metaData, file, dijixObjectData, fileName, name;
+        var data, pdf, fileSize, pageCount, usePages, pages, src, mime, metaData, file, dijixObjectData, fileName, name;
         return _regenerator2.default.wrap(function _callee5$(_context5) {
           while (1) {
             switch (_context5.prev = _context5.next) {
@@ -290,16 +289,13 @@ var DijixPDF = function () {
               case 17:
                 src = _context5.sent;
                 mime = 'application/pdf';
-                // const { info: { Title: title, ...metaData } } = {}; //{} await pdf.getMetadata();
-
-                title = 'test';
                 metaData = {};
                 file = typeof opts.src === 'string' && opts.src.match(/^(([A-Z]:)?[.]?[\\{1,2}/]?.*[\\{1,2}/])*(.+)\.(.+)/);
                 // digix object
 
                 dijixObjectData = { fileSize: fileSize, metaData: metaData, pageCount: pageCount, src: src, mime: mime };
                 fileName = opts.fileName || file && file[3] + '.pdf';
-                name = opts.name || title;
+                name = opts.name;
 
                 if (fileName) {
                   dijixObjectData.fileName = fileName;
@@ -312,7 +308,7 @@ var DijixPDF = function () {
                 }
                 return _context5.abrupt('return', dijixObjectData);
 
-              case 29:
+              case 28:
               case 'end':
                 return _context5.stop();
             }
